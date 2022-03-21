@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>git_learn</artifactId>
+        <groupId>org.example</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>hbase-project</artifactId>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <hbase.version>2.1.3</hbase.version>
+        <log4j.version>1.7.10</log4j.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-client</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-server</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-common</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 打标准jar包插件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <!--  运行Jar包时的主类  -->
+                            <mainClass>com.suke_w.HbaseOp</mainClass>
+                            <!--  是否指定项目中的classpath下的依赖  -->
+                            <addClasspath>true</addClasspath>
+                            <!--   指定依赖的前缀  -->
+                            <classpathPrefix>lib/</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!--会在target文件夹下生成两个jar包，一个是不带依赖的jar包，一个是后缀有-dependencies带有依赖的jar包-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <!--                <version>3.0.0</version>-->
+                <executions>
+                    <execution>
+                        <!--  配置名字自定义  -->
+                        <id>package</id>
+                        <!--  绑定到package生命周期阶段上  -->
+                        <phase>package</phase>
+                        <goals>
+                            <!--  打包任务只运行一次  -->
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <!--  打包后的Main方法入口类名  -->
+                                    <mainClass>
+                                        com.suke_w.HbaseOp
+                                    </mainClass>
+                                </manifest>
+                            </archive>
+                            <descriptorRefs>
+                                <!-- 给打包所有依赖的jar增加后缀命名  -->
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+
+            <plugin>
+                <!--编译插件及配置JDK版本-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <!-- 源码使用的JDK版本 -->
+                    <source>1.8</source>
+                    <!--  源码编译后的Class文件版本,请与源码版本保持一致 -->
+                    <target>1.8</target>
+                    <!--  编译用的编码  -->
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+        <!-- 对于项目资源文件的配置  -->
+        <resources>
+            <resource>
+                <!--  在打包时,能过"-Pdev "指定打包项目环境的资源文件配置   -->
+                <directory>src/main/resources/${env}</directory>
+            </resource>
+            <resource>
+                <!--  打包时,把项目其它文件的配置文件也添加进去  -->
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                    <include>**/*.properties</include>
+                </includes>
+            </resource>
+        </resources>
+
+    </build>
+
+    <!--  打包环境定义: 开发环境/生产环境  -->
+    <profiles>
+        <!--  配置开发环境  -->
+        <profile>
+            <id>dev</id>
+            <properties>
+                <env>dev</env>
+            </properties>
+            <activation>
+                <!-- 未指定环境时,默认打包dev环境-->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <!--  配置生产环境  -->
+        <profile>
+            <id>product</id>
+            <properties>
+                <env>product</env>
+            </properties>
+        </profile>
+    </profiles>
+
+
+</project>
